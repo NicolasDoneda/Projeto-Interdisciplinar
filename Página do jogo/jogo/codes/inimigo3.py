@@ -1,30 +1,31 @@
 import pygame
 from enemy_laser import EnemyLaser
+from math import sin
 
-
-
-class Businessmen(pygame.sprite.Sprite):
-    def __init__(self, x, y, delay=10):
+class StartupCEO(pygame.sprite.Sprite):
+    def __init__(self, x, y):
         super().__init__()
-        file_path = './graphics/red.png'
+        file_path = './graphics/green.png'  # Sugiro que tenha uma imagem para este inimigo
         original_image = pygame.image.load(file_path).convert_alpha()
         self.image = pygame.transform.scale(original_image, (100, 100))
         self.rect = self.image.get_rect(topleft=(x, y))
         self.speed = 2
-        self.last_move_time = pygame.time.get_ticks()
-        self.delay = delay
+        self.amplitude = 50  # Amplitude do movimento senoidal
+        self.frequency = 0.05  # Velocidade do movimento senoidal
+        self.initial_y = y
+        self.time = 0
         self.can_shoot = True
-        self.shoot_cooldown = 2000  # Tempo entre tiros
 
     def update(self, current_time):
-        if current_time - self.last_move_time >= self.delay:
-            self.rect.x += self.speed
+        # Movimento senoidal
+        self.time += 1
+        self.rect.x += self.speed
+        self.rect.y = self.initial_y + self.amplitude * sin(self.time * self.frequency)
 
-        # Muda a direção ao tocar na borda
+
+        # Inverte direção nas bordas
         if self.rect.right >= 600 or self.rect.left <= 0:
             self.speed *= -1
-            self.rect.y += 20  # Desce uma linha
-        self.last_move_time = current_time
 
     def shoot(self, current_time):
      cooldown = 2000  # Tempo entre tiros em milissegundos (2 segundos)
@@ -32,5 +33,3 @@ class Businessmen(pygame.sprite.Sprite):
         self.last_shot_time = current_time
         return EnemyLaser(self.rect.center, 5)
      return None
-
-
