@@ -11,6 +11,7 @@ class Player(pygame.sprite.Sprite):
         self.ready = True
         self.laser_time = 0
         self.laser_cooldown = 600
+        self.lives = 3  # Adicionando vidas ao jogador
 
         self.lasers = pygame.sprite.Group()
 
@@ -40,6 +41,10 @@ class Player(pygame.sprite.Sprite):
 
     def shoot_laser(self):
         self.lasers.add(Laser(self.rect.center, -8, self.rect.bottom))
+
+    def take_damage(self):
+        self.lives -= 1
+        return self.lives <= 0  # Retorna True se o jogador ficar sem vidas
 
     def update(self):
         self.get_input()

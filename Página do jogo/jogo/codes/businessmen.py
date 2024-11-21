@@ -1,21 +1,22 @@
 import pygame
+from enemy_laser import EnemyLaser
+
+
 
 class Businessmen(pygame.sprite.Sprite):
-    def __init__(self, x, y, delay = 10):
+    def __init__(self, x, y, delay=10):
         super().__init__()
         file_path = './graphics/red.png'
         original_image = pygame.image.load(file_path).convert_alpha()
-        self.image = pygame.transform.scale(original_image,(100,100))
+        self.image = pygame.transform.scale(original_image, (100, 100))
         self.rect = self.image.get_rect(topleft=(x, y))
         self.speed = 2
         self.last_move_time = pygame.time.get_ticks()
         self.delay = delay
+        self.can_shoot = True
+        self.shoot_cooldown = 2000  # Tempo entre tiros
 
-
-
-    def update(self):
-        current_time = pygame.time.get_ticks()
-
+    def update(self, current_time):
         if current_time - self.last_move_time >= self.delay:
             self.rect.x += self.speed
 
@@ -24,4 +25,10 @@ class Businessmen(pygame.sprite.Sprite):
             self.speed *= -1
             self.rect.y += 20  # Desce uma linha
         self.last_move_time = current_time
+
+    def shoot(self):
+        if self.can_shoot:
+            self.can_shoot = False
+            return EnemyLaser(self.rect.center, 5)
+        return None
 
