@@ -11,13 +11,18 @@ class Game:
     def __init__(self, screen_width, screen_height):
         self.screen_width = screen_width
         self.screen_height = screen_height
+        
+        # Carrega e configura o background
+        self.background = pygame.image.load('./graphics/fundo.jpg').convert()  # Adicione sua imagem de fundo aqui
+        # Redimensiona a imagem para o tamanho da tela
+        self.background = pygame.transform.scale(self.background, (screen_width, screen_height))
+        
         self.reset_game()
 
     def reset_game(self):
         player_sprite = Player((self.screen_width / 2, self.screen_height), self.screen_width, 5)
         self.player = pygame.sprite.GroupSingle(player_sprite)
 
-        # Criar um grupo para todos os inimigos
         self.all_enemies = pygame.sprite.Group()
         self.setup_enemies()
         
@@ -49,43 +54,40 @@ class Game:
             self.all_enemies.add(ceo)
 
     def run(self, screen):
+        # Desenha o background primeiro
+        screen.blit(self.background, (0, 0))
+        
         current_time = pygame.time.get_ticks()
         
         self.player.update()
 
-        # Verificar se todos os inimigos foram destruídos
         if len(self.all_enemies) == 0:
             return "WIN"
 
-        # Atualizar e fazer os inimigos atirarem
         for enemy in self.all_enemies:
             enemy.update(current_time)
-            if random.randint(1, 100) == 1:  # Chance de atirar
-                laser = enemy.shoot(current_time)  # Passe o current_time para shoot
+            if random.randint(1, 100) == 1:
+                laser = enemy.shoot(current_time)
                 if laser:
                     self.enemy_lasers.add(laser)
 
-        # Atualizar lasers do jogador e verificar colisões
         for laser in self.player.sprite.lasers:
             hits = pygame.sprite.spritecollide(laser, self.all_enemies, True)
             if hits:
                 laser.kill()
                 self.score += len(hits) * 10
 
-        # Verificar colisões de lasers inimigos com o jogador
         self.enemy_lasers.update()
         enemy_hits = pygame.sprite.spritecollide(self.player.sprite, self.enemy_lasers, True)
         if enemy_hits:
             if self.player.sprite.take_damage():
                 return "GAME_OVER"
 
-        # Desenhar elementos
         self.player.sprite.lasers.draw(screen)
         self.enemy_lasers.draw(screen)
         self.player.draw(screen)
         self.all_enemies.draw(screen)
 
-        # Renderizar pontuação e vidas
         score_text = self.font.render(f'Score: {self.score}', True, (255, 255, 255))
         lives_text = self.font.render(f'Lives: {self.player.sprite.lives}', True, (255, 255, 255))
         screen.blit(score_text, (10, 10))
@@ -123,11 +125,11 @@ def main():
                     game.reset_game()
                     game_state = "PLAYING"
 
-        screen.fill((30, 30, 30))
-
         if game_state == "PLAYING":
+            screen.blit(game.background, (0, 0))  # Desenha o background antes de tudo
             game_state = game.run(screen)
         elif game_state == "GAME_OVER":
+            screen.blit(game.background, (0, 0))  # Mantém o background mesmo na tela de game over
             game_over_text = pygame.font.Font(None, 74).render('GAME OVER', True, (255, 0, 0))
             score_text = pygame.font.Font(None, 36).render(f'Score: {game.score}', True, (255, 255, 255))
             
@@ -137,6 +139,7 @@ def main():
             retry_button.draw(screen)
 
         elif game_state == "WIN":
+            screen.blit(game.background, (0, 0))  # Mantém o background mesmo na tela de vitória
             win_text = pygame.font.Font(None, 74).render('VOCÊ VENCEU!', True, (0, 255, 0))
             score_text = pygame.font.Font(None, 36).render(f'Score Final: {game.score}', True, (255, 255, 255))
             

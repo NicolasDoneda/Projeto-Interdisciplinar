@@ -1,8 +1,6 @@
 import pygame
 from enemy_laser import EnemyLaser
 
-
-
 class Businessmen(pygame.sprite.Sprite):
     def __init__(self, x, y, delay=10):
         super().__init__()
@@ -14,7 +12,8 @@ class Businessmen(pygame.sprite.Sprite):
         self.last_move_time = pygame.time.get_ticks()
         self.delay = delay
         self.can_shoot = True
-        self.shoot_cooldown = 2000  # Tempo entre tiros
+        self.shoot_cooldown = 1000  # Alterado para 1 segundo e meio
+        self.last_shot_time = pygame.time.get_ticks()
 
     def update(self, current_time):
         if current_time - self.last_move_time >= self.delay:
@@ -27,10 +26,7 @@ class Businessmen(pygame.sprite.Sprite):
         self.last_move_time = current_time
 
     def shoot(self, current_time):
-     cooldown = 2000  # Tempo entre tiros em milissegundos (2 segundos)
-     if current_time - self.last_shot_time >= cooldown:  # Verifica o cooldown
-        self.last_shot_time = current_time
-        return EnemyLaser(self.rect.center, 5)
-     return None
-
-
+        if current_time - self.last_shot_time >= self.shoot_cooldown:
+            self.last_shot_time = current_time
+            return EnemyLaser(self.rect.center, 5)
+        return None
